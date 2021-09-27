@@ -18,4 +18,5 @@ Part 1B is a system that takes user input and can recommend a restaurant based o
 - It recommends based on area, food type and price range preferences
 - It contains a keyword matching function that finds the preferences in the user input 
 - It is able to find preferences despite spelling errors by implementing the levenshtein distance
+- It finds restaurants with the preferences in the restaurant.csv file
 - It has multiple states in the sytem that match the flowchart in system_dialog_diagram_flowchart.pdf
