@@ -23,5 +23,5 @@ Part 1B is a system that takes user input and can recommend a restaurant based o
 
 
 How to run it:
-- Part 1A are multiple functions (each model has its own function), each model can be run seperately but the library's need to be imported first at the top of the code. 
+- Part 1A are multiple functions (each model has its own function), each model can be run seperately but the libraries and data need to be imported first at the top of the code. As is written now, all models will run and the accuracy will be given as a juxtaposition. To run models seperately, silence or call certain model functions.
 - Part 1B can be run at once, because the state transition model calls all necessary functions 
