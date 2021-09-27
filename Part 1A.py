@@ -9,7 +9,7 @@ Original file is located at
 # Baseline systems
 """
 
-# import library's 
+# Import libraries 
 import pandas as pd
 import numpy as np
 import sklearn.metrics
@@ -22,8 +22,23 @@ import random
 import seaborn as sn
 from io import StringIO
 from collections import Counter
+from sklearn import model_selection
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import log_loss
+from sklearn.metrics import precision_recall_fscore_support as score, precision_score, recall_score, f1_score
+from sklearn import preprocessing
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.preprocessing import LabelEncoder
+from keras.models import Sequential 
+from keras import layers
+from keras.backend import clear_session
+import seaborn as sns
+from sklearn import metrics
+from sklearn.metrics import precision_recall_fscore_support
 
-#Import data file
+## Section 1: import data
+# Import data file
 df = pd.read_csv(('dialog_acts.dat'),names=['label'])
 
 # Transform to lowercase
@@ -35,6 +50,7 @@ mask = np.random.rand(len(df)) <= 0.85
 training_data = df[mask]
 testing_data = df[~mask]
 
+## Section 2: Models
 """**Majority class baseline system**"""
 
 # Function that uses testing data as input and classifies as most_common label
@@ -68,10 +84,9 @@ def keyword_matching(testing_data):
 
   # Fill df_labels dataframe with predicted labels
   df_labels[:]['label'] = keyword_label
-
   return df_labels['label']
 
-# Function to find type of dialog in a string
+# Function to find type of dialog in a string - called by keyword_matching
 def dialog_type(utterance):
   if utterance.find("okay") > 0 or utterance.find("oke") > 0:
     keyword = "ack"
@@ -105,7 +120,6 @@ def dialog_type(utterance):
     keyword = "null"
   else:
     keyword = "inform"
-
   return keyword
 
 # compare predicted labels with correct labels in testing_data
@@ -115,7 +129,6 @@ print(accuracy_score(testing_data['label'],keyword_matching(testing_data)))
 list_labels = ["ack","affirm","negate","inform","thankyou","bye", "restart","request","reqmore",  "reqalts", "repeat", "hello" ,"deny","confirm", "null"]
 
 # Compare the prediction of keyword matching model with actual labels
-
 # Get keyword model's prediction
 pred_key = keyword_matching(testing_data)
 
@@ -131,16 +144,12 @@ for row_index, (inpt, prediction, label) in enumerate( zip (inpt, pred_key, test
   if prediction != label:
     print('Row', row_index, 'has been classified as ', prediction, 'and should be ', label, '\t', '\t', inpt)
 
-"""#Machine learning
+    
+"""#Machine learning models
 
 ## Model 1: Neural Network
 """
-
 # Create neural network model
-# Import library's
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.preprocessing import LabelEncoder
-
 # Copy train and test data for this model
 m1_sentences_train = training_data['utterance']
 m1_sentences_test = testing_data['utterance']
@@ -150,7 +159,6 @@ m1_y_test = testing_data['label']
 # Vectorize the training and testing x data
 m1_vectorizer = CountVectorizer()
 m1_vectorizer.fit(m1_sentences_train)
-
 m1_x_train = m1_vectorizer.transform(m1_sentences_train)
 m1_x_test = m1_vectorizer.transform(m1_sentences_test)
 
@@ -158,15 +166,10 @@ m1_x_test = m1_vectorizer.transform(m1_sentences_test)
 label_encoder = LabelEncoder()
 m1_y_train = label_encoder.fit_transform(m1_y_train)
 m1_y_test = label_encoder.fit_transform(m1_y_test)
-
 m1_y_train = keras.utils.to_categorical(m1_y_train, 18)
 m1_y_test = keras.utils.to_categorical(m1_y_test, 18)
 
 # Test neural network
-from keras.models import Sequential 
-from keras import layers
-from keras.backend import clear_session
-
 m1_input_dim = m1_x_train.shape[1]
 
 # Architecture - layers
@@ -181,15 +184,13 @@ model1.summary()
 # Train model and print training epochs
 history = model1.fit(m1_x_train, m1_y_train, epochs=15, verbose=1 , validation_data=(m1_x_test, m1_y_test), batch_size=100)
 
-#clear_session()
-
 # Get training and validation accuracy for neural network
 model1_training_loss, model1_training_accuracy = model1.evaluate(m1_x_train, m1_y_train, verbose=False)
 print("Training Accuracy: ",  "{:.0%}".format(model1_training_accuracy), " Training loss: ", "{:.0%}". format(model1_training_loss))
-
 model1_validation_loss, model1_validation_accuracy = model1.evaluate(m1_x_test, m1_y_test, verbose=False)
 print("Validation Accuracy: ", "{:.0%}".format(model1_validation_accuracy), " Validation loss: ", "{:.0%}". format(model1_validation_loss))
 
+# Necessary for evaluation later on
 m1_y_pred=model1.predict(m1_x_test) 
 m1_y_pred=np.argmax(m1_y_pred, axis=1)
 y_test_eva =np.argmax(m1_y_test, axis=1)
@@ -203,6 +204,7 @@ plt.xlabel('epoch')
 plt.legend(['train', 'validation'], loc='right')
 plt.show()
 
+# Plot training loss
 plt.plot(history.history['loss'])
 plt.plot(history.history['val_loss'])
 plt.title('Model Loss')
@@ -216,7 +218,7 @@ loss, accuracy = model1.evaluate(m1_x_test, m1_y_test, verbose=0)
 print(loss)
 print(accuracy)
 
-#input prompt for the first model
+# Input prompt for the first model - uncomment if want to test with new data
 '''
 while(True):
   pred_sentence = str(input("Enter new sentence : "))
@@ -229,10 +231,6 @@ while(True):
 """## Model 2: Logistic Regression"""
 
 # Model 2: Logistic regression
-from sklearn.model_selection import train_test_split
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.linear_model import LogisticRegression
-
 # Prepare data - vectorize
 m2_sentences = df['utterance'].values
 m2_y = df['label'].values
@@ -255,7 +253,7 @@ predictions = logisticRegr.predict(m2_x_test)
 score = logisticRegr.score(m2_x_test, m2_y_test)
 print(score)
 
-#input prompt for the second model
+# Input prompt for the second model - uncomment if want to test with new data
 '''
 while(True):
   pred_sentence = input("Enter new sentence : ")
@@ -265,24 +263,12 @@ while(True):
 '''
 
 """# Evaluation
-
-Quantitative evaluation:
-
-Accuracy, Precision, and Recall: 
-F1 Score: 
-
-Error analysis:
-- Maybe Confusion metrics? List of errors per sentences
-
 """
 
-
-
 """## Model 1: Neural network
-
 ### Quantitative evaluation
-
-We chose the accuracy as a general overview for quantitive evaluation because it gives a good estimate of how well the model performs. Also the F1 score because if the data is heavily skewed, then the F1 gives a good estimate.
+We chose the accuracy as a general overview for quantitive evaluation because it gives a good estimate of how well the model performs. 
+Also the F1 score because if the data is heavily skewed, then the F1 gives a good estimate.
 """
 
 # Neural network quantative evaluation
@@ -313,14 +299,12 @@ sn.heatmap(cm, annot=True,cmap="OrRd",fmt='g')
 # plt.show()
 
 # Calculate F-score - precision and recall
-from sklearn.metrics import precision_recall_fscore_support
 precision_recall_fscore_support(y_test_eva, m1_y_pred, average='macro')
 
 """So precision is 0.63 and recall is 0.60 percent. This is not very high as we will see later on in comparison with the logistic regression.
 
 ### Error analysis
 """
-
 # Finding items that are most often classified wrong
 inpt = testing_data['utterance']
 wrong_utterance = [] 
@@ -334,22 +318,14 @@ Counter(wrong_utterance).most_common()[0:15]
 It also classifies a couple of other cases wrong, but since the accuracy is really high, these are just single instances.
 
 ### Difficult cases
-
 ***TODO: for example utterances that are not fluent (e.g. due to speech recognition issues) or the presence of negation (I don’t want an expensive restaurant). For each case, create test instances and evaluate how your systems perform on these cases. Such as:***
 
 ### System comparison
-
 The neural network model compares well against the baseline. The validation accuracy is 98 percent compared to 39 percent majority and 84 percent keyword baseline systems. Therefore, the neural network is much more accurate than the baseline systems with an improvement of at least 14 percent accuracy. For the comparison of a neural network model 1 and model 2 logistic regression, see the model 2 section on system comparison.
 
 ## Model 2: Logistic Regression
-
 ### Quantative evaluation
 """
-
-# Import libraries
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn import metrics
 
 # Create confusion matrix
 cm = metrics.confusion_matrix(m2_y_test, predictions)
@@ -378,20 +354,18 @@ Counter(wrong_utterance).most_common()[0:15]
 ### Difficult cases
 
 ### System comparison
+The logistic regression performs well compared to the baseline models. Both baseline models have lower accuracy and are therefore not great classifiers. 
+The logistic regression reaches an accuracy of 98 percent which is a good performance. 
+This model would be better suited to classify dialog than the baseline models.
 
-The logistic regression performs well compared to the baseline models. Both baseline models have lower accuracy and are therefore not great classifiers. The logistic regression reaches an accuracy of 98 percent which is a good performance. This model would be better suited to classify dialog than the baseline models.
-
-The neural network has the same accuracy as the logistic regression model, with both having a 98 percent prediction accuracy in classifying dialog. Interestingly, both models also both have difficulty classifying sentences containing two commands. However, when we look at the precision and recall score resulting from the F1 analysis, it turns out that the logistic regression has a much higher percentage in both precision and recall than the neural network. Therefore, we conclude that the logistic regression would be better suited to classify dialog than the neural network.  TODO: add difficult cases evaluation
+The neural network has the same accuracy as the logistic regression model, with both having a 98 percent prediction accuracy in classifying dialog. 
+Interestingly, both models also both have difficulty classifying sentences containing two commands. 
+However, when we look at the precision and recall score resulting from the F1 analysis, it turns out that the logistic regression has a much higher 
+percentage in both precision and recall than the neural network. 
+Therefore, we conclude that the logistic regression would be better suited to classify dialog than the neural network.  TODO: add difficult cases evaluation
 """
 
 # Difficult cases test
-import pandas as pd
-from sklearn import model_selection
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import log_loss
-from sklearn.metrics import precision_recall_fscore_support as score, precision_score, recall_score, f1_score
-from sklearn import preprocessing
 names = ['ack']
 dataframe = pd.read_csv('dialog_acts.dat', names=names)
 array = dataframe.values
