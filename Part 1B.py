@@ -3,9 +3,12 @@
 Receives user input string and finds keywords
 """
 
-# Determines levenshteinDistance between two elements
+# Import libraries
 import numpy as np
+import pandas as pd
+import random
 
+## Function 1: Determines levenshteinDistance between two elements
 # Calculate likeness of two words with levenshtein distance
 def levenshteinDistanceMatrix(token1, token2):
     distances = np.zeros((len(token1) + 1, len(token2) + 1))
@@ -37,7 +40,8 @@ def levenshteinDistanceMatrix(token1, token2):
 
     return distances[len(token1)][len(token2)]
 
-# Find the words that are closest to the input word
+
+## Function 2: Find the words that are closest to the input word
 def closest_area(sentence,dictionary):
 
   # Will store all words and distances if < 3
@@ -80,7 +84,8 @@ def closest_area(sentence,dictionary):
   else:
     return None
 
-# Function to find keyword user preferences for area, food and price in string
+
+## Function 3: find keyword user preferences for area, food and price in string
 # Utterance has to be a list of string words
 def keyword(utterance):
 
@@ -136,28 +141,14 @@ def keyword(utterance):
   # Return found user preferences
   return area, food_type, price
 
-# Preference function testing
-# Prepare user input to find preferences
-inpt = "Hi I am looking for the Nerth restaurant with food"
 
-# Convert input to lowercase
-inpt_lower = inpt.lower()
-
-# Find keywords
-area, food_type, price = keyword(inpt_lower.split())
-
-# Recommnedation lookup function
-import pandas as pd
-import numpy as np
-import random
-
-# Find a matching recommendation from database restaurant_info.csv
+## Function 4: Find a matching recommendation from database restaurant_info.csv
 def get_recommendations(area, food_type, price):
   df = pd.read_csv("restaurant_info.csv") 
   recommendations=df[(df.area == area) & (df.food==food_type) & (df.pricerange==price)]
   return recommendations
 
-# Function to find type of dialog in a string based on keyword
+## Function 5: find type of dialog in a string based on keyword
 def dialog_type(utterance):
 
   # Check the possible dialog_type keywords
@@ -196,7 +187,8 @@ def dialog_type(utterance):
 
   return keyword
 
-#States
+## MAIN: State transition - recommendation lookup function
+# States
 # 1 preference request
 # 2 ask for missing preferences
 # 3 recommend restaurant based on preferences
@@ -208,7 +200,6 @@ def dialog_type(utterance):
 # Dialog system
 state = 1
 dialog_active = True
-
 
 # Initiate preferences
 area = None
