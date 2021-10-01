@@ -2,7 +2,7 @@
 ## UU MAIR assignment 1
 The assignment is to create a dialog system that can recommend restaurants to users based on their preferences.
 
-This folder currently consists of assignment 1 part A and B with the corresponding files.
+This folder currently consists of assignment 1 part A, B and C with the corresponding files.
 
 
 Part 1A has as goal to predict the dialog type of user input: for example request, inform, confirm <br>
@@ -21,7 +21,13 @@ Part 1B is a system that takes user input and can recommend a restaurant based o
 - It finds restaurants with the preferences in the restaurant.csv file
 - It has multiple states in the sytem that match the flowchart in system_dialog_diagram_flowchart.pdf
 
+Part 1C is a dialog recommendation system (see 1B) but with the additional features of: 
+- confirmation to user, 
+- choosing a formal or informal system response
+- adding additional preferences such as busy or romantic restaurant.
+
 
 How to run it:
 - Part 1A are multiple functions (each model has its own function), each model can be run seperately but the libraries and data need to be imported first at the top of the code. As is written now, all models will run and the accuracy will be given as a juxtaposition. To run models seperately, silence or call certain model functions.
 - Part 1B can be run at once, because the state transition model calls all necessary functions 
+- Part 1C requires the helper functions from the file 1C_Helper_Functions.py, so import that first. In Main form 1C this should be done, but if not import the functions from the helper file manually. You can run the 1C_main_state_dialog.py file and it will ask for user input to start the conversation.
