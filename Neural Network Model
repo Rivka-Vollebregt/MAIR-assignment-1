@@ -1,0 +1,55 @@
+# Create neural network model
+# Import library's
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.preprocessing import LabelEncoder
+from keras.models import Sequential 
+from keras import layers
+from keras.backend import clear_session
+
+#Import data file
+df = pd.read_csv(('dialog_acts.dat'),names=['label'])
+
+# Transform to lowercase
+df['label'] = df['label'].str.lower()
+df[['label','utterance']] = df['label'].str.split(" ",1,expand=True)
+
+# split into 85% train and 15% test data
+mask = np.random.rand(len(df)) <= 0.85
+training_data = df[mask]
+testing_data = df[~mask]
+
+# Copy train and test data for this model
+m1_sentences_train = training_data['utterance']
+m1_sentences_test = testing_data['utterance']
+m1_y_train = training_data['label']
+m1_y_test = testing_data['label']
+
+# Vectorize the training and testing x data
+m1_vectorizer = CountVectorizer()
+m1_vectorizer.fit(m1_sentences_train)
+
+m1_x_train = m1_vectorizer.transform(m1_sentences_train)
+m1_x_test = m1_vectorizer.transform(m1_sentences_test)
+
+# Categorize the labels (y data)
+label_encoder = LabelEncoder()
+m1_y_train = label_encoder.fit_transform(m1_y_train)
+m1_y_test = label_encoder.fit_transform(m1_y_test)
+
+m1_y_train = keras.utils.to_categorical(m1_y_train, 18)
+m1_y_test = keras.utils.to_categorical(m1_y_test, 18)
+
+m1_input_dim = m1_x_train.shape[1]
+
+# Architecture - layers
+model1 = Sequential()
+model1.add(layers.Dense(28, input_dim=m1_input_dim, activation = 'relu'))
+model1.add(layers.Dense(18, activation='sigmoid'))
+model1.compile(loss='binary_crossentropy', optimizer='adam', metrics='accuracy')
+
+# Train model and print training epochs
+history = model1.fit(m1_x_train, m1_y_train, epochs=15, verbose=0 , validation_data=(m1_x_test, m1_y_test), batch_size=100)
+
+
+# All possible response types (15 types)
+list_labels = ["ack","affirm","negate","inform","thankyou","bye", "restart","request","reqmore",  "reqalts", "repeat", "hello" ,"deny","confirm", "null"]
